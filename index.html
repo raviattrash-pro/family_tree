@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Legacy - Professional Card Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c5a059;
+            --dark: #121212;
+            --card-bg: #1e1e1e;
+            --card-border: #333;
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark) url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            color: white; overflow: auto;
+        }
+
+        /* Nav Bar Styling */
+        .nav-bar {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(0,0,0,0.95); padding: 15px;
+            border-bottom: 2px solid var(--gold);
+            display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .input-box { background: #fff; padding: 6px 12px; border-radius: 4px; display: flex; gap: 10px; }
+        .input-box input, .input-box select { border: none; outline: none; font-family: 'Poppins'; font-size: 13px; }
+
+        .btn {
+            padding: 10px 20px; border-radius: 4px; border: none; font-weight: 600;
+            cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.3s;
+        }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-gold:hover { background: #e0bc7a; box-shadow: 0 0 15px rgba(197, 160, 89, 0.4); }
+
+        /* Tree Structure */
+        .tree-viewport { padding: 80px; display: flex; justify-content: center; min-width: max-content; }
+        .tree ul { padding-top: 40px; position: relative; display: flex; justify-content: center; }
+        .tree li { text-align: center; list-style-type: none; position: relative; padding: 40px 20px 0 20px; }
+
+        /* Elegant Gold Lines */
+        .tree li::before, .tree li::after {
+            content: ''; position: absolute; top: 0; right: 50%;
+            border-top: 2px solid var(--gold); width: 50%; height: 40px;
+        }
+        .tree li::after { right: auto; left: 50%; border-left: 2px solid var(--gold); }
+        .tree li:only-child::after, .tree li:only-child::before { display: none; }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::after { border-radius: 12px 0 0 0; }
+        .tree li:last-child::before { border-right: 2px solid var(--gold); border-radius: 0 12px 0 0; }
+        .tree ul ul::before {
+            content: ''; position: absolute; top: 0; left: 50%;
+            border-left: 2px solid var(--gold); width: 0; height: 40px;
+        }
+
+        /* Couple Connection */
+        .couple-wrapper { display: flex; justify-content: center; align-items: center; gap: 40px; position: relative; }
+        .couple-wrapper::after {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 2px; background: var(--gold);
+        }
+
+        /* Rectangular Card Design */
+        .card {
+            background: var(--card-bg);
+            width: 140px; height: 200px; /* Portrait Ratio */
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            position: relative; z-index: 2;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+
+        .card:hover {
+            border-color: var(--gold);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%);
+            transition: 0.4s;
+        }
+        .card:hover img { filter: grayscale(0%); transform: scale(1.05); }
+
+        /* Card Label / Nameplate */
+        .card-info {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9) 40%);
+            padding: 20px 10px 10px 10px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .card h4 {
+            margin: 0; font-family: 'Cinzel', serif;
+            font-size: 14px; color: var(--gold);
+            text-shadow: 1px 1px 2px black;
+        }
+
+        .card p {
+            margin: 3px 0 0; font-size: 8px;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: #aaa;
+        }
+
+        .del-btn {
+            position: absolute; top: 8px; right: 8px;
+            cursor: pointer; color: white; background: rgba(0,0,0,0.5);
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; z-index: 10;
+        }
+        .del-btn:hover { background: #ff4757; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="input-box">
+            <input type="text" id="nameIn" placeholder="Enter Full Name">
+        </div>
+        <div class="input-box">
+            <select id="parentIn"><option value="root">Ancestral Head</option></select>
+        </div>
+        <div class="input-box">
+            <select id="typeIn">
+                <option value="child">As Child / Branch</option>
+                <option value="spouse">As Spouse of Selected</option>
+            </select>
+        </div>
+        <label class="btn btn-gold">
+            Photo <input type="file" id="photoIn" accept="image/*" style="display:none">
+        </label>
+        <button class="btn btn-gold" onclick="addMember()">Build Member</button>
+        <button class="btn" onclick="clearAll()" style="background:#333; color:#fff;">Clear Tree</button>
+        <button class="btn" onclick="download()" style="background:#fff; color:#000;">Download PNG</button>
+    </div>
+
+    <div class="tree-viewport">
+        <div class="tree" id="treeDisplay"></div>
+    </div>
+
+    <script>
+        const DB_NAME = "LegacyCardEdition";
+        let db;
+
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = e => e.target.result.createObjectStore("members", { keyPath: "id" });
+        request.onsuccess = e => { db = e.target.result; render(); };
+
+        async function addMember() {
+            const name = document.getElementById('nameIn').value;
+            const photoFile = document.getElementById('photoIn').files[0];
+            const parentId = document.getElementById('parentIn').value;
+            const type = document.getElementById('typeIn').value;
+
+            if (!name) return alert("Please enter a name");
+
+            let photoData = "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80";
+            if (photoFile) {
+                photoData = await new Promise(r => {
+                    const fr = new FileReader();
+                    fr.onload = ev => r(ev.target.result);
+                    fr.readAsDataURL(photoFile);
+                });
+            }
+
+            const member = {
+                id: Date.now().toString(),
+                name,
+                photo: photoData,
+                parentId: parentId === 'root' ? null : parentId,
+                isSpouse: type === 'spouse'
+            };
+
+            const tx = db.transaction("members", "readwrite");
+            tx.objectStore("members").add(member);
+            tx.oncomplete = () => {
+                document.getElementById('nameIn').value = '';
+                render();
+            };
+        }
+
+        async function render() {
+            const tx = db.transaction("members", "readonly");
+            const members = await new Promise(r => tx.objectStore("members").getAll().onsuccess = e => r(e.target.result));
+            
+            const parentSelect = document.getElementById('parentIn');
+            parentSelect.innerHTML = '<option value="root">Ancestral Head</option>';
+            members.forEach(m => {
+                if (!m.isSpouse) parentSelect.add(new Option(m.name, m.id));
+            });
+
+            const display = document.getElementById('treeDisplay');
+            display.innerHTML = '';
+
+            const roots = members.filter(m => !m.parentId && !m.isSpouse);
+            if (roots.length > 0) {
+                const ul = document.createElement('ul');
+                roots.forEach(root => ul.appendChild(createNode(root, members)));
+                display.appendChild(ul);
+            }
+        }
+
+        function createNode(member, all) {
+            const li = document.createElement('li');
+            const spouse = all.find(m => m.parentId === member.id && m.isSpouse);
+            
+            let html = '';
+            const cardTemplate = (m, label) => `
+                <div class="card">
+                    <span class="del-btn" onclick="deleteNode('${m.id}')">✕</span>
+                    <img src="${m.photo}">
+                    <div class="card-info">
+                        <h4>${m.name}</h4>
+                        <p>${label}</p>
+                    </div>
+                </div>
+            `;
+
+            if (spouse) {
+                html = `
+                <div class="couple-wrapper">
+                    ${cardTemplate(member, "Primary Member")}
+                    ${cardTemplate(spouse, "Spouse")}
+                </div>`;
+            } else {
+                html = cardTemplate(member, "Primary Member");
+            }
+
+            li.innerHTML = html;
+            const children = all.filter(m => m.parentId === member.id && !m.isSpouse);
+            if (children.length > 0) {
+                const ul = document.createElement('ul');
+                children.forEach(c => ul.appendChild(createNode(c, all)));
+                li.appendChild(ul);
+            }
+            return li;
+        }
+
+        async function deleteNode(id) {
+            if(!confirm("Remove from legacy?")) return;
+            const tx = db.transaction("members", "readwrite");
+            tx.objectStore("members").delete(id);
+            tx.oncomplete = () => render();
+        }
+
+        function clearAll() {
+            if(confirm("Wipe all data?")) {
+                const tx = db.transaction("members", "readwrite");
+                tx.objectStore("members").clear();
+                tx.oncomplete = () => render();
+            }
+        }
+
+        function download() {
+            html2canvas(document.getElementById('treeDisplay'), { 
+                backgroundColor: '#121212', 
+                scale: 2 
+            }).then(canvas => {
+                const a = document.createElement('a');
+                a.download = 'family-legacy-cards.png';
+                a.href = canvas.toDataURL();
+                a.click();
+            });
+        }
+    </script>
+</body>
+</html>
